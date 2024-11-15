@@ -127,3 +127,13 @@ function resetFilter() {
 
 // Load data on page load
 document.addEventListener('DOMContentLoaded', updateTable);
+
+// Detect Enter key in the modal and save data
+document.addEventListener('keydown', function (event) {
+    // Check if modal is open and Enter is pressed
+    if (modal.style.display === 'block' && event.key === 'Enter') {
+        event.preventDefault(); // Prevent default behavior (e.g., form submission)
+        saveData(); // Call the save data function
+    }
+});
+

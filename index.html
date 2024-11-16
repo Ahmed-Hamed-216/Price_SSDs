@@ -4,68 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Product Price Logger</title>
-    <style>
-        body { font-family: Arial, sans-serif; text-align: center; margin: 20px; background-color: #f9f9f9; }
-        h1, h2 { color: #333; }
-        .product { display: inline-block; margin: 10px; cursor: pointer; }
-        .product img { border: 2px solid #ddd; border-radius: 8px; transition: transform 0.3s; }
-        .product img:hover { transform: scale(1.05); border-color: #007BFF; }
-        table { width: 100%; margin-top: 20px; border-collapse: collapse; background: #fff; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
-        table, th, td { border: 1px solid #ddd; }
-        th, td { padding: 12px; text-align: center; }
-        th { background-color: #007BFF; color: #fff; }
-        tr:nth-child(even) { background-color: #f2f2f2; }
-        .btn { padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer; }
-        .btn-edit { background-color: #54AC43; color: #fff; }
-        .btn-edit:hover { background-color: #3e8730; }
-        .btn-delete { background-color: #dc3545; color: #fff; }
-        .btn-delete:hover { background-color: #c82333; }
-        .btn-filter { background-color: #007BFF; color: #fff; margin: 10px; }
-        .btn-filter:hover { background-color: #0056b3; }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <h1>Product Price Logger</h1>
 
     <!-- Product Images -->
-    <div>
-        <div class="product">
-            <img src="image/crucial-mx500.png" 
-                 alt="Crucial MX500" class="product" data-product="Crucial MX500" width="150">
-            <p>Crucial MX500</p>
-        </div>
-        <div class="product">
-            <img src="image/crucial-bx500.png" 
-                 alt="Crucial BX500" class="product" data-product="Crucial BX500" width="150">
-            <p>Crucial BX500</p>
-        </div>
-        <div class="product">
-            <img src="image/Samsung 870 EVO.png" 
-                 alt="Samsung 870 EVO" class="product" data-product="Samsung 870 EVO" width="150">
-            <p>Samsung 870 EVO</p>
-        </div>
+    <div class="product-container">
+        <img src="image/crucial-mx500.png" alt="Crucial MX500" class="product" data-product="Crucial MX500">
+        <img src="image/crucial-bx500.png" alt="Crucial BX500" class="product" data-product="Crucial BX500">
+        <img src="image/Samsung 870 EVO.png" alt="Samsung 870 EVO" class="product" data-product="Samsung 870 EVO">
     </div>
 
     <!-- Form Modal -->
-    <div id="formModal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background:#fff; padding:20px; border:1px solid #ddd; border-radius: 8px; box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);">
+    <div id="formModal">
         <h2 id="productTitle"></h2>
         <label for="capacity">Capacity:</label>
         <select id="capacity">
             <option value="250GB">250GB</option>
             <option value="500GB">500GB</option>
-        </select><br><br>
+        </select>
         <label for="price">Price:</label>
-        <input type="number" id="price" placeholder="Enter price"><br><br>
+        <input type="number" id="price" placeholder="Enter price">
         <label for="shop">Shop Name:</label>
-        <input type="text" id="shop" placeholder="Enter shop name"><br><br>
-        <button class="btn btn-save" onclick="saveData()">Save</button>
-        <button class="btn btn-cancel" onclick="closeModal()">Cancel</button>
+        <input type="text" id="shop" placeholder="Enter shop name">
+        <button onclick="saveData()">Save</button>
+        <button onclick="closeModal()">Cancel</button>
     </div>
-
-    <!-- Filters -->
-    <button class="btn btn-filter" onclick="filterByCapacity('250GB')">Filter 250GB</button>
-    <button class="btn btn-filter" onclick="filterByCapacity('500GB')">Filter 500GB</button>
-    <button class="btn btn-filter" onclick="resetFilter()">Reset Filter</button>
 
     <!-- Data Table -->
     <h2>Price List</h2>
@@ -80,7 +45,7 @@
             </tr>
         </thead>
         <tbody>
-            <!-- Data will be appended here -->
+            <!-- Data will be dynamically appended -->
         </tbody>
     </table>
 

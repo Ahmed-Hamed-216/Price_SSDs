@@ -1,68 +1,172 @@
- <!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Product Price Logger</title>
+    <title>متتبع أسعار SSD</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Cairo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Product Price Logger</h1>
+    <div class="container">
+        <header class="app-header">
+            <h1><i class="fas fa-chart-line"></i> متتبع أسعار SSD</h1>
+            <p class="subtitle">تتبع ومقارنة أسعار SSD عبر المتاجر المختلفة</p>
+            <div class="header-controls">
+                <button id="theme-toggle" class="btn btn-secondary">
+                    <i class="fas fa-moon"></i> تبديل الوضع الداكن
+                </button>
+            </div>
+        </header>
 
-    <!-- Product Images -->
-<!--     <div class="product-container">
-        <img src="image/crucial-mx500.png" 
-             alt="Crucial MX500" class="product" data-product="Crucial MX500">
-        <img src="image/crucial-bx500.png" 
-             alt="Crucial BX500" class="product" data-product="Crucial BX500">
-        <img src="image/Samsung 870 EVO.png" 
-             alt="Samsung 870 EVO" class="product" data-product="Samsung 870 EVO">
-    </div> -->
-  
-      <!-- Product Images -->
-    <div class="product-container">
-        <img src="https://content.crucial.com/content/dam/crucial/ssd-products/mx500/images/product/crucial-mx500-2-5inch-product-front-image.psd.transform/medium-png/image.png" 
-             alt="Crucial MX500" class="product" data-product="Crucial MX500">
-        <img src="https://content.crucial.com/content/dam/crucial/ssd-products/bx500/images/product/crucial-bx500-front-image.psd.transform/medium-png/image.png" 
-             alt="Crucial BX500" class="product" data-product="Crucial BX500">
-        <img src="https://tv-it.com/storage/new-project-4-4.webp" 
-             alt="Samsung 870 EVO" class="product" data-product="Samsung 870 EVO">
+        <div class="actions-bar">
+            <button id="manage-products-btn" class="btn btn-primary">
+                <i class="fas fa-list"></i> إدارة المنتجات
+            </button>
+            <button id="toggle-filters-btn" class="btn btn-secondary">
+                <i class="fas fa-filter"></i> إظهار الفلاتر
+            </button>
+        </div>
+
+        <div class="product-gallery" id="product-gallery">
+            <!-- Products will be dynamically loaded here -->
+        </div>
+
+        <div class="filter-controls hidden" id="filter-controls">
+            <div class="filter-group">
+                <label for="search-input">بحث:</label>
+                <input type="text" id="search-input" class="form-control" placeholder="ابحث عن المنتجات أو المتاجر...">
+            </div>
+            <div class="filter-group">
+                <label for="capacity-filter">تصفية حسب السعة:</label>
+                <select id="capacity-filter">
+                    <option value="all">جميع السعات</option>
+                    <option value="250GB">250 جيجابايت</option>
+                    <option value="500GB">500 جيجابايت</option>
+                    <option value="1TB">1 تيرابايت</option>
+                    <option value="2TB">2 تيرابايت</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="product-filter">تصفية حسب المنتج:</label>
+                <select id="product-filter">
+                    <option value="all">جميع المنتجات</option>
+                    <!-- Product options will be loaded dynamically -->
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="sort-by">ترتيب حسب:</label>
+                <select id="sort-by">
+                    <option value="newest">الأحدث أولاً</option>
+                    <option value="price-asc">السعر (من الأقل إلى الأعلى)</option>
+                    <option value="price-desc">السعر (من الأعلى إلى الأقل)</option>
+                </select>
+            </div>
+            <button id="reset-filters" class="btn btn-secondary">
+                <i class="fas fa-sync-alt"></i> إعادة تعيين الفلاتر
+            </button>
+        </div>
+
+        <div class="data-section">
+            <div class="section-header">
+                <h2><i class="fas fa-list"></i> سجل الأسعار</h2>
+                <div class="stats-summary">
+                    <span id="total-entries">0 مدخلات</span>
+                    <span id="lowest-price">الأقل: -</span>
+                </div>
+            </div>
+            <div class="table-container">
+                <table id="dataTable">
+                    <thead>
+                        <tr>
+                            <th>المنتج</th>
+                            <th>السعة</th>
+                            <th>السعر</th>
+                            <th>المتجر</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Data will be appended here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
-
-    <!-- Form Modal -->
-    <div id="formModal">
-        <h2 id="productTitle"></h2>
-        <label for="capacity">Capacity:</label>
-        <select id="capacity">
-            <option value="250GB">250GB</option>
-            <option value="500GB">500GB</option>
-        </select><br>
-        <label for="price">Price:</label>
-        <input type="number" id="price" placeholder="Enter price"><br>
-        <label for="shop">Shop Name:</label>
-        <input type="text" id="shop" placeholder="Enter shop name"><br>
-        <button onclick="saveData()">Save</button>
-        <button onclick="closeModal()">Cancel</button>
+    <!-- Price Entry Modal -->
+    <div id="formModal" class="modal" role="dialog" aria-labelledby="productTitle">
+        <div class="modal-content" tabindex="-1">
+            <div class="modal-header">
+                <h3 id="productTitle"></h3>
+                <button class="close-modal" aria-label="إغلاق النافذة" onclick="closeModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="capacity">السعة:</label>
+                    <select id="capacity" class="form-control">
+                        <!-- Capacities will be dynamically loaded -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="price">السعر (جنيه مصري):</label>
+                    <input type="number" id="price" class="form-control" placeholder="أدخل السعر">
+                </div>
+                <div class="form-group">
+                    <label for="shop">اسم المتجر:</label>
+                    <input type="text" id="shop" class="form-control" placeholder="أدخل اسم المتجر">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button onclick="closeModal()" class="btn btn-cancel">
+                    <i class="fas fa-times"></i> إلغاء
+                </button>
+                <button onclick="saveData()" class="btn btn-save">
+                    <i class="fas fa-save"></i> حفظ
+                </button>
+            </div>
+        </div>
     </div>
 
-    <!-- Data Table -->
-    <h2>Price List</h2>
-    <table id="dataTable">
-        <thead>
-            <tr>
-                <th>Product</th>
-                <th>Capacity</th>
-                <th>Price</th>
-                <th>Shop</th>
-                <th>Actions</th> <!-- Column for Edit/Delete buttons -->
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Data will be appended here -->
-        </tbody>
-    </table>
+    <!-- Product Management Modal -->
+    <div id="productModal" class="modal" role="dialog" aria-labelledby="manageProductsTitle">
+        <div class="modal-content" tabindex="-1">
+            <div class="modal-header">
+                <h3 id="manageProductsTitle"><i class="fas fa-boxes"></i> إدارة المنتجات</h3>
+                <button class="close-modal" aria-label="إغلاق النافذة" onclick="closeProductModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="new-product-name">اسم المنتج:</label>
+                    <input type="text" id="new-product-name" class="form-control" placeholder="أدخل اسم المنتج">
+                </div>
+                <div class="form-group">
+                    <label for="new-product-image">رابط الصورة:</label>
+                    <input type="text" id="new-product-image" class="form-control" placeholder="أدخل رابط الصورة">
+                </div>
+                <div class="form-group">
+                    <label for="new-product-capacities">السعات المتاحة (افصل بينها بفواصل, مثال: 250GB,500GB):</label>
+                    <input type="text" id="new-product-capacities" class="form-control" placeholder="مثال: 250GB,500GB,1TB">
+                </div>
+                <button onclick="addNewProduct()" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> إضافة منتج
+                </button>
+                <div class="products-list" id="products-list">
+                    <!-- Existing products will be listed here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button onclick="closeProductModal()" class="btn btn-cancel">
+                    <i class="fas fa-times"></i> إغلاق
+                </button>
+            </div>
+        </div>
+    </div>
 
-    <script src="script.js"></script>
+    <!-- Notifications Container -->
+    <div id="notifications" class="notifications"></div>
+
+    <script src="scripts/main.js"></script>
 </body>
 </html>

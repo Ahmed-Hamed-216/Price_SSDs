@@ -1,6 +1,6 @@
 let selectedProduct = null;
 let editIndex = null;
-let editProductIndex = null; // New variable to track the product being edited
+let editProductIndex = null;
 
 // DOM initialization
 function initDOM() {
@@ -10,9 +10,9 @@ function initDOM() {
         productTitle: document.getElementById('productTitle'),
         capacityInput: document.getElementById('capacity'),
         priceInput: document.getElementById('price'),
-        shopSelect: document.getElementById('shop-select'), // Added for shop dropdown
-        shopInput: document.getElementById('shop'), // Added for new shop input
-        newShopInput: document.getElementById('new-shop-input'), // Added for new shop input container
+        shopSelect: document.getElementById('shop-select'),
+        shopInput: document.getElementById('shop'),
+        newShopInput: document.getElementById('new-shop-input'),
         dataTable: document.getElementById('dataTable').querySelector('tbody'),
         capacityFilter: document.getElementById('capacity-filter'),
         productFilter: document.getElementById('product-filter'),
@@ -30,9 +30,9 @@ function initDOM() {
         themeToggle: document.getElementById('theme-toggle'),
         toggleFiltersBtn: document.getElementById('toggle-filters-btn'),
         filterControls: document.getElementById('filter-controls'),
-        addProductBtn: document.getElementById('add-product-btn'), // Added for add product button
-        saveEditBtn: document.getElementById('save-edit-btn'), // Added for save edit button
-        cancelEditBtn: document.getElementById('cancel-edit-btn'), // Added for cancel edit button
+        addProductBtn: document.getElementById('add-product-btn'),
+        saveEditBtn: document.getElementById('save-edit-btn'),
+        cancelEditBtn: document.getElementById('cancel-edit-btn'),
     };
 }
 
@@ -280,6 +280,7 @@ function updateCapacityOptions(productName) {
 
 function updateShopOptions() {
     const shopSelect = document.getElementById('shop-select');
+    if (!shopSelect) return;
     const shops = getShops();
     shopSelect.innerHTML = '<option value="new">متجر جديد</option>';
     shops.forEach(shop => {
@@ -288,22 +289,25 @@ function updateShopOptions() {
         option.textContent = shop;
         shopSelect.appendChild(option);
     });
+}
 
-    // Add event listener to show/hide new shop input
-    shopSelect.addEventListener('change', () => {
-        const newShopInput = document.getElementById('new-shop-input');
+function toggleNewShopInput() {
+    const shopSelect = document.getElementById('shop-select');
+    const newShopInput = document.getElementById('new-shop-input');
+    if (shopSelect && newShopInput) {
         newShopInput.style.display = shopSelect.value === 'new' ? 'block' : 'none';
         if (shopSelect.value !== 'new') {
             document.getElementById('shop').value = '';
         }
-    });
+    }
 }
 
 function openModal(product) {
     selectedProduct = product;
     document.getElementById('productTitle').textContent = product;
     updateCapacityOptions(product);
-    updateShopOptions(); // Update shop options when opening the modal
+    updateShopOptions();
+    toggleNewShopInput();
     document.getElementById('formModal').style.display = 'flex';
     document.getElementById('formModal').querySelector('.modal-content').focus();
     document.getElementById('price').focus();
@@ -347,8 +351,13 @@ function init() {
     const { 
         modal, productModal, capacityFilter, productFilter, 
         sortBy, resetFiltersBtn, manageProductsBtn, 
-        searchInput, themeToggle, toggleFiltersBtn, filterControls 
+        searchInput, themeToggle, toggleFiltersBtn, filterControls,
+        shopSelect
     } = initDOM();
+
+    if (shopSelect) {
+        shopSelect.addEventListener('change', toggleNewShopInput);
+    }
 
     capacityFilter.addEventListener('change', debounce(filterData, 300));
     productFilter.addEventListener('change', debounce(filterData, 300));
@@ -431,8 +440,8 @@ function resetFilters() {
 
 function openProductModal() {
     renderProductsList();
-    editProductIndex = null; // Reset edit index when opening the modal
-    toggleProductActions(false); // Show "Add Product" button by default
+    editProductIndex = null;
+    toggleProductActions(false);
     document.getElementById('productModal').style.display = 'flex';
     document.getElementById('productModal').querySelector('.modal-content').focus();
 }
@@ -443,7 +452,6 @@ function closeModal() {
     document.getElementById('capacity').disabled = false;
     document.getElementById('price').value = '';
     document.getElementById('shop-select').value = 'new';
-    document.getElementById('shop').value = '';
     document.getElementById('new-shop-input').style.display = 'none';
     selectedProduct = null;
     editIndex = null;
@@ -455,7 +463,7 @@ function closeProductModal() {
     document.getElementById('new-product-image').value = '';
     document.getElementById('new-product-capacities').value = '';
     editProductIndex = null;
-    toggleProductActions(false); // Reset to "Add Product" button
+    toggleProductActions(false);
 }
 
 function saveData() {
@@ -475,7 +483,6 @@ function saveData() {
             timestamp: Date.now(),
         };
 
-        // Save the shop if it's new and not already in the list
         if (shopSelect.value === 'new' && shop) {
             const shops = getShops();
             if (!shops.includes(shop)) {

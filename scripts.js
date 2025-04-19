@@ -1,5 +1,6 @@
 let selectedProduct = null;
 let editIndex = null;
+let editProductIndex = null; // New variable to track the product being edited
 
 // DOM initialization
 function initDOM() {
@@ -9,7 +10,9 @@ function initDOM() {
         productTitle: document.getElementById('productTitle'),
         capacityInput: document.getElementById('capacity'),
         priceInput: document.getElementById('price'),
-        shopInput: document.getElementById('shop'),
+        shopSelect: document.getElementById('shop-select'), // Added for shop dropdown
+        shopInput: document.getElementById('shop'), // Added for new shop input
+        newShopInput: document.getElementById('new-shop-input'), // Added for new shop input container
         dataTable: document.getElementById('dataTable').querySelector('tbody'),
         capacityFilter: document.getElementById('capacity-filter'),
         productFilter: document.getElementById('product-filter'),
@@ -27,6 +30,9 @@ function initDOM() {
         themeToggle: document.getElementById('theme-toggle'),
         toggleFiltersBtn: document.getElementById('toggle-filters-btn'),
         filterControls: document.getElementById('filter-controls'),
+        addProductBtn: document.getElementById('add-product-btn'), // Added for add product button
+        saveEditBtn: document.getElementById('save-edit-btn'), // Added for save edit button
+        cancelEditBtn: document.getElementById('cancel-edit-btn'), // Added for cancel edit button
     };
 }
 
@@ -92,6 +98,11 @@ function getPriceData() {
     return JSON.parse(localStorage.getItem('priceData') || '[]');
 }
 
+function getShops() {
+    if (!isLocalStorageAvailable()) return [];
+    return JSON.parse(localStorage.getItem('shops') || '[]');
+}
+
 function saveProducts(products) {
     if (isLocalStorageAvailable()) {
         localStorage.setItem('products', JSON.stringify(products));
@@ -101,6 +112,12 @@ function saveProducts(products) {
 function savePriceData(priceData) {
     if (isLocalStorageAvailable()) {
         localStorage.setItem('priceData', JSON.stringify(priceData));
+    }
+}
+
+function saveShops(shops) {
+    if (isLocalStorageAvailable()) {
+        localStorage.setItem('shops', JSON.stringify(shops));
     }
 }
 
@@ -261,10 +278,32 @@ function updateCapacityOptions(productName) {
     }
 }
 
+function updateShopOptions() {
+    const shopSelect = document.getElementById('shop-select');
+    const shops = getShops();
+    shopSelect.innerHTML = '<option value="new">متجر جديد</option>';
+    shops.forEach(shop => {
+        const option = document.createElement('option');
+        option.value = shop;
+        option.textContent = shop;
+        shopSelect.appendChild(option);
+    });
+
+    // Add event listener to show/hide new shop input
+    shopSelect.addEventListener('change', () => {
+        const newShopInput = document.getElementById('new-shop-input');
+        newShopInput.style.display = shopSelect.value === 'new' ? 'block' : 'none';
+        if (shopSelect.value !== 'new') {
+            document.getElementById('shop').value = '';
+        }
+    });
+}
+
 function openModal(product) {
     selectedProduct = product;
     document.getElementById('productTitle').textContent = product;
     updateCapacityOptions(product);
+    updateShopOptions(); // Update shop options when opening the modal
     document.getElementById('formModal').style.display = 'flex';
     document.getElementById('formModal').querySelector('.modal-content').focus();
     document.getElementById('price').focus();
@@ -300,7 +339,7 @@ function init() {
     if (!isLocalStorageAvailable()) {
         showNotification('تحذير: المتصفح لا يدعم LocalStorage، البيانات قد لا تُحفظ.', 'error');
     }
-    
+
     renderProductGallery(getProducts());
     updateTable(getPriceData());
     updateProductFilterOptions(getProducts());
@@ -392,6 +431,8 @@ function resetFilters() {
 
 function openProductModal() {
     renderProductsList();
+    editProductIndex = null; // Reset edit index when opening the modal
+    toggleProductActions(false); // Show "Add Product" button by default
     document.getElementById('productModal').style.display = 'flex';
     document.getElementById('productModal').querySelector('.modal-content').focus();
 }
@@ -401,7 +442,9 @@ function closeModal() {
     document.getElementById('capacity').value = '250GB';
     document.getElementById('capacity').disabled = false;
     document.getElementById('price').value = '';
+    document.getElementById('shop-select').value = 'new';
     document.getElementById('shop').value = '';
+    document.getElementById('new-shop-input').style.display = 'none';
     selectedProduct = null;
     editIndex = null;
 }
@@ -411,12 +454,15 @@ function closeProductModal() {
     document.getElementById('new-product-name').value = '';
     document.getElementById('new-product-image').value = '';
     document.getElementById('new-product-capacities').value = '';
+    editProductIndex = null;
+    toggleProductActions(false); // Reset to "Add Product" button
 }
 
 function saveData() {
     const capacity = document.getElementById('capacity').value;
     const price = parseFloat(document.getElementById('price').value);
-    const shop = document.getElementById('shop').value.trim();
+    const shopSelect = document.getElementById('shop-select');
+    let shop = shopSelect.value === 'new' ? document.getElementById('shop').value.trim() : shopSelect.value;
 
     try {
         validateFormData({ capacity, price, shop });
@@ -428,6 +474,15 @@ function saveData() {
             shop,
             timestamp: Date.now(),
         };
+
+        // Save the shop if it's new and not already in the list
+        if (shopSelect.value === 'new' && shop) {
+            const shops = getShops();
+            if (!shops.includes(shop)) {
+                shops.push(shop);
+                saveShops(shops);
+            }
+        }
 
         if (editIndex !== null) {
             data[editIndex] = entry;
@@ -452,7 +507,16 @@ function editData(index) {
     document.getElementById('productTitle').textContent = selectedProduct;
     updateCapacityOptions(selectedProduct);
     document.getElementById('price').value = item.price;
-    document.getElementById('shop').value = item.shop;
+    const shopSelect = document.getElementById('shop-select');
+    const shops = getShops();
+    if (shops.includes(item.shop)) {
+        shopSelect.value = item.shop;
+        document.getElementById('new-shop-input').style.display = 'none';
+    } else {
+        shopSelect.value = 'new';
+        document.getElementById('new-shop-input').style.display = 'block';
+        document.getElementById('shop').value = item.shop;
+    }
     editIndex = index;
     openModal(selectedProduct);
 }
@@ -495,40 +559,72 @@ function addNewProduct() {
     }
 }
 
+function toggleProductActions(isEditing) {
+    const addProductBtn = document.getElementById('add-product-btn');
+    const saveEditBtn = document.getElementById('save-edit-btn');
+    const cancelEditBtn = document.getElementById('cancel-edit-btn');
+
+    if (isEditing) {
+        addProductBtn.style.display = 'none';
+        saveEditBtn.style.display = 'inline-flex';
+        cancelEditBtn.style.display = 'inline-flex';
+    } else {
+        addProductBtn.style.display = 'inline-flex';
+        saveEditBtn.style.display = 'none';
+        cancelEditBtn.style.display = 'none';
+    }
+}
+
 function editProduct(index) {
     const products = getProducts();
     const product = products[index];
     document.getElementById('new-product-name').value = product.name;
     document.getElementById('new-product-image').value = product.image;
     document.getElementById('new-product-capacities').value = Array.isArray(product.capacities) ? product.capacities.join(', ') : '';
+    editProductIndex = index;
+    toggleProductActions(true);
+}
 
-    if (confirm('هل تريد حفظ التعديلات على هذا المنتج؟')) {
-        const name = document.getElementById('new-product-name').value.trim();
-        const image = document.getElementById('new-product-image').value.trim();
-        const capacitiesInput = document.getElementById('new-product-capacities').value.trim();
-        const capacities = capacitiesInput ? capacitiesInput.split(',').map(c => c.trim()) : [];
+function saveProductEdit() {
+    const name = document.getElementById('new-product-name').value.trim();
+    const image = document.getElementById('new-product-image').value.trim();
+    const capacitiesInput = document.getElementById('new-product-capacities').value.trim();
+    const capacities = capacitiesInput ? capacitiesInput.split(',').map(c => c.trim()) : [];
 
-        try {
-            validateFormData({ capacity: '250GB', price: 1, shop: 'test', image, capacities });
-            if (products.some((p, i) => p.name.toLowerCase() === name.toLowerCase() && i !== index)) {
-                throw new Error('منتج بهذا الاسم موجود بالفعل');
-            }
-
-            products[index] = { name, image, capacities };
-            saveProducts(products);
-            renderProductsList();
-            renderProductGallery(products);
-            updateProductFilterOptions(products);
-            showNotification('تم تعديل المنتج بنجاح', 'success');
-        } catch (error) {
-            showNotification(error.message, 'error');
+    try {
+        validateFormData({ capacity: '250GB', price: 1, shop: 'test', image, capacities });
+        const products = getProducts();
+        if (products.some((p, i) => p.name.toLowerCase() === name.toLowerCase() && i !== editProductIndex)) {
+            throw new Error('منتج بهذا الاسم موجود بالفعل');
         }
+
+        products[editProductIndex] = { name, image, capacities };
+        saveProducts(products);
+        renderProductsList();
+        renderProductGallery(products);
+        updateProductFilterOptions(products);
+        showNotification('تم تعديل المنتج بنجاح', 'success');
+        document.getElementById('new-product-name').value = '';
+        document.getElementById('new-product-image').value = '';
+        document.getElementById('new-product-capacities').value = '';
+        editProductIndex = null;
+        toggleProductActions(false);
+    } catch (error) {
+        showNotification(error.message, 'error');
     }
+}
+
+function cancelProductEdit() {
+    document.getElementById('new-product-name').value = '';
+    document.getElementById('new-product-image').value = '';
+    document.getElementById('new-product-capacities').value = '';
+    editProductIndex = null;
+    toggleProductActions(false);
 }
 
 function deleteProduct(index) {
     if (!confirm('هل أنت متأكد من حذف هذا المنتج؟ سيتم حذف كل مدخلات الأسعار الخاصة به.')) return;
-    
+
     const products = getProducts();
     const productName = products[index].name;
     products.splice(index, 1);

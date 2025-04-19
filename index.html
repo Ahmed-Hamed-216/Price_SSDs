@@ -114,7 +114,14 @@
                     <input type="number" id="price" class="form-control" placeholder="أدخل السعر">
                 </div>
                 <div class="form-group">
-                    <label for="shop">اسم المتجر:</label>
+                    <label for="shop-select">اختر المتجر:</label>
+                    <select id="shop-select" class="form-control">
+                        <option value="new">متجر جديد</option>
+                        <!-- Shops will be dynamically loaded here -->
+                    </select>
+                </div>
+                <div class="form-group" id="new-shop-input" style="display: none;">
+                    <label for="shop">اسم المتجر الجديد:</label>
                     <input type="text" id="shop" class="form-control" placeholder="أدخل اسم المتجر">
                 </div>
             </div>
@@ -149,9 +156,17 @@
                     <label for="new-product-capacities">السعات المتاحة (افصل بينها بفواصل, مثال: 250GB,500GB):</label>
                     <input type="text" id="new-product-capacities" class="form-control" placeholder="مثال: 250GB,500GB,1TB">
                 </div>
-                <button onclick="addNewProduct()" class="btn btn-primary">
-                    <i class="fas fa-plus"></i> إضافة منتج
-                </button>
+                <div class="product-actions">
+                    <button id="add-product-btn" onclick="addNewProduct()" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> إضافة منتج
+                    </button>
+                    <button id="save-edit-btn" onclick="saveProductEdit()" class="btn btn-save" style="display: none;">
+                        <i class="fas fa-save"></i> حفظ التعديل
+                    </button>
+                    <button id="cancel-edit-btn" onclick="cancelProductEdit()" class="btn btn-cancel" style="display: none;">
+                        <i class="fas fa-times"></i> إلغاء التعديل
+                    </button>
+                </div>
                 <div class="products-list" id="products-list">
                     <!-- Existing products will be listed here -->
                 </div>

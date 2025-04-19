@@ -279,6 +279,7 @@ tr:hover {
     z-index: 1000;
     justify-content: center;
     align-items: center;
+    overflow-y: auto; /* Allow scrolling for the modal on small screens */
 }
 
 .modal-content {
@@ -286,8 +287,11 @@ tr:hover {
     border-radius: var(--border-radius);
     width: 100%;
     max-width: 500px;
+    max-height: 90vh; /* Limit the height of the modal */
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
     animation: modalFadeIn 0.3s;
+    display: flex;
+    flex-direction: column;
 }
 
 @keyframes modalFadeIn {
@@ -307,6 +311,7 @@ tr:hover {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-shrink: 0; /* Prevent header from shrinking */
 }
 
 .modal-header h3 {
@@ -329,6 +334,8 @@ tr:hover {
 
 .modal-body {
     padding: 20px;
+    flex-grow: 1; /* Allow body to grow and take available space */
+    overflow-y: auto; /* Enable scrolling for the modal body */
 }
 
 .modal-footer {
@@ -337,6 +344,7 @@ tr:hover {
     display: flex;
     justify-content: flex-end;
     gap: 10px;
+    flex-shrink: 0; /* Prevent footer from shrinking */
 }
 
 .form-group {
@@ -370,10 +378,18 @@ tr:hover {
     gap: 10px;
 }
 
+.product-actions {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
 .products-list {
     margin-top: 20px;
     border-top: 1px solid #eee;
     padding-top: 15px;
+    max-height: 300px; /* Set a maximum height for the products list */
+    overflow-y: auto; /* Enable scrolling for the products list */
 }
 
 .product-item {
@@ -481,25 +497,33 @@ tr:hover {
     .product-gallery {
         grid-template-columns: repeat(2, 1fr);
     }
-    
+
     .filter-controls {
         flex-direction: column;
         align-items: flex-start;
     }
-    
+
     .section-header, .stats-summary {
         flex-direction: column;
         align-items: flex-start;
         gap: 8px;
     }
-    
+
     th, td {
         padding: 8px 10px;
     }
-    
+
     .notifications {
         left: 10px;
         max-width: calc(100% - 20px);
+    }
+
+    .modal-content {
+        max-height: 80vh; /* Adjust height for smaller screens */
+    }
+
+    .products-list {
+        max-height: 200px; /* Reduce height on smaller screens */
     }
 }
 
@@ -507,17 +531,22 @@ tr:hover {
     .product-gallery {
         grid-template-columns: 1fr;
     }
-    
+
     .app-header h1 {
         font-size: 2rem;
     }
-    
+
     .modal-content {
         margin: 0 15px;
+        max-height: 75vh; /* Further adjust height for very small screens */
     }
-    
+
     .actions-bar {
         flex-direction: column;
         align-items: flex-end;
+    }
+
+    .products-list {
+        max-height: 150px; /* Further reduce height for very small screens */
     }
 }
